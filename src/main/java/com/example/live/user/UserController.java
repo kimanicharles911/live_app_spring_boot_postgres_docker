@@ -1,6 +1,7 @@
 package com.example.live.user;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,39 +17,32 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/users")
 public class UserController {
   @Autowired
-  private UserRepository userRepository;
+  private UserService userService;
 
   @GetMapping
   public List<User> getAllUsers(){
-    return userRepository.findAll();
+    return userService.getAllUsers();
   }
 
   @GetMapping("/{id}")
   public User getUserById(@PathVariable Long id) {
-    return userRepository.findById(id).get();
+    Optional<User> user = userService.getUserById(id);
+    return user.orElse(null);
   }
 
   @PostMapping
   public User createUser(@RequestBody User user) {
-    return userRepository.save(user);
+    return userService.createUser(user);
   }
 
   @PutMapping("/{id}")
   public User updateUser(@PathVariable Long id, @RequestBody User user){
-    User existingUser = userRepository.findById(id).get();
-    existingUser.setName(user.getName());
-    existingUser.setEmail(user.getEmail());
-    return userRepository.save(existingUser);
+    return userService.updateUser(id, user);
   }
 
   @DeleteMapping("/{id}")
   public String deleteUser(@PathVariable Long id){
-    try{
-      userRepository.deleteById(id);
-      return "User deleted successfully.";
-    }catch(Exception e){
-      return "User not found.";
-    }
+    return userService.deleteUser(id) ? "User deleted successfully." : "User not found.";
   }
 
 }
